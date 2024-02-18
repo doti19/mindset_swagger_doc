@@ -1,0 +1,1017 @@
+openapi: 3.0.0
+info:
+  title: Mindset
+  description: A Platform focusing in youths reaching their true potential
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/SAMINASSAMINAS/mindset/1.0.0
+  description: SwaggerHub API Auto Mocking
+- url: http://localhost:3000/api/v1
+  description: Local Server
+paths:
+  /auth/register:
+    post:
+      tags:
+      - Authentication
+      summary: Register a new user
+      description: Registers a new user with the provided details.
+      responses:
+        "200":
+          description: User registered successfully
+        "400":
+          description: "Bad request, invalid input"
+        "500":
+          description: Internal Server Error
+  /auth/login:
+    post:
+      tags:
+      - Authentication
+      summary: Log in a user
+      description: Logs in a user with the provided credentials.
+      responses:
+        "200":
+          description: User logged in successfully
+        "401":
+          description: "Unauthorized, invalid credentials"
+        "500":
+          description: Internal Server Error
+  /auth/google:
+    get:
+      tags:
+      - Authentication
+      summary: Google OpenID Connect endpoint
+      description: "Logs in a user via Google. If the user is logging in for the first\
+        \ time, a new user is registered."
+      responses:
+        "200":
+          description: User logged in successfully
+        "401":
+          description: "Unauthorized, invalid credentials"
+        "500":
+          description: Internal Server Error
+  /auth/forgot-password:
+    post:
+      tags:
+      - Authentication
+      summary: Forgot password
+      description: Sends a password reset email to the provided email address.
+      responses:
+        "200":
+          description: Password reset email sent
+        "400":
+          description: "Bad request, invalid email"
+        "500":
+          description: Internal Server Error
+  /auth/reset-password:
+    post:
+      tags:
+      - Authentication
+      summary: Reset password
+      description: Resets the user's password using the provided reset token and new
+        password.
+      responses:
+        "200":
+          description: Password reset successfully
+        "400":
+          description: "Bad request, invalid token or password"
+        "500":
+          description: Internal Server Error
+  /auth/logout:
+    post:
+      tags:
+      - Authentication
+      summary: Log out a user
+      description: Logs out the user by invalidating their authentication token.
+      responses:
+        "200":
+          description: User logged out successfully
+        "401":
+          description: "Unauthorized, invalid token"
+        "500":
+          description: Internal Server Error
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /user/profile:
+    get:
+      tags:
+      - User
+      summary: Get user profile
+      description: Retrieves the profile of the currently authenticated user.
+      responses:
+        "200":
+          description: User profile retrieved successfully
+        "401":
+          description: "Unauthorized, invalid token"
+        "500":
+          description: Internal Server Error
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+    put:
+      tags:
+      - User
+      summary: Update user profile
+      description: Updates the profile of the currently authenticated user with the
+        provided details.
+      responses:
+        "200":
+          description: User profile updated successfully
+        "400":
+          description: "Bad request, invalid input"
+        "401":
+          description: "Unauthorized, invalid token"
+        "500":
+          description: Internal Server Error
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+components:
+  schemas:
+    User:
+      required:
+      - address
+      - courses
+      - dateOfBirth
+      - email
+      - firstName
+      - gender
+      - id
+      - isOnline
+      - isProfilePublic
+      - lastName
+      - lastOnline
+      - notificationPreference
+      - phoneNumber
+      type: object
+      properties:
+        id:
+          description: Unique identifier for the User.
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        firstName:
+          type: string
+          description: User's last name
+        lastName:
+          type: string
+          description: User's last name
+        emailAddress:
+          $ref: '#/components/schemas/User_emailAddress'
+        dateOfBirth:
+          type: string
+          description: User's date of birth in yyyy-MM-dd format
+          format: date
+          example: 1997-07-06
+        gender:
+          type: string
+          description: User's specified gender
+          example: male
+          enum:
+          - male
+          - female
+          - other
+        phoneNumber:
+          $ref: '#/components/schemas/User_phoneNumber'
+        address:
+          $ref: '#/components/schemas/User_address'
+        ranking:
+          $ref: '#/components/schemas/User_ranking'
+        ustaRanking:
+          $ref: '#/components/schemas/User_ustaRanking'
+        isProfilePublic:
+          type: boolean
+          description: "Whether the User's profile is public or not, defaults to true"
+          readOnly: true
+          example: true
+          default: true
+        notificationPreference:
+          $ref: '#/components/schemas/NotificationPreferences'
+        courses:
+          type: array
+          description: List of courses the user is going to take
+          items:
+            allOf:
+            - $ref: '#/components/schemas/Course'
+        isOnline:
+          type: boolean
+          description: Status of user used in the chat page
+          default: false
+        lastOnline:
+          type: string
+          description: timestamp of the last time online in yyyy-MM-ddThr:mm:ssZ.
+          format: date-time
+        chatList:
+          $ref: '#/components/schemas/User_chatList'
+        journals:
+          $ref: '#/components/schemas/User_journals'
+      description: The basic User Schema
+    Course:
+      required:
+      - assessments
+      - courseDuration
+      - curriculum
+      - description
+      - id
+      - level
+      - resources
+      - startingDate
+      - status
+      - title
+      - videos
+      type: object
+      properties:
+        id:
+          description: A unique generated course Id
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        title:
+          type: string
+          description: The title of the course.
+          example: The Power of Discipline
+        description:
+          type: string
+          description: A detailed description of the course content and objectives.
+          example: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do\
+            \ eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim\
+            \ ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip\
+            \ ex ea commodo consequat."
+        level:
+          type: string
+          description: "The difficulty level of the course (e.g., beginner, intermediate,\
+            \ advanced)."
+          example: beginner
+        courseDuration:
+          type: integer
+          description: "The estimated duration of the course in weeks or hours, which\
+            \ one?."
+          example: 2
+        startingDate:
+          type: string
+          description: When the user started this course in yyyy-MM-dd format.
+          format: Date
+          example: 2024-02-14
+        resources:
+          type: array
+          description: links to document URL
+          example:
+          - www.something.com/something
+          - www.somethingElse.com/somethingElse
+          items:
+            type: string
+            format: uri
+        curriculum:
+          type: array
+          description: Defines the structured overview of modules and lessons in the
+            course.
+          items:
+            allOf:
+            - $ref: '#/components/schemas/Modules'
+        isActive:
+          type: boolean
+          description: Indicates course availability
+          readOnly: true
+          example: true
+          default: false
+        assessments:
+          minLength: 1
+          type: array
+          description: List of assessments
+          items:
+            allOf:
+            - $ref: '#/components/schemas/Assessments'
+        videos:
+          allOf:
+          - $ref: '#/components/schemas/Videos'
+        status:
+          type: string
+          description: "current status of course (e.g \"started\", \"finished\", \"\
+            new\")"
+          example: started
+          default: new
+          enum:
+          - started
+          - finished
+          - new
+      description: Course Schema
+    Message:
+      required:
+      - content
+      - recipientId
+      - senderId
+      type: object
+      properties:
+        id:
+          description: The unique identifier of the message
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        senderId:
+          description: The ObjectId of sender
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        recipientId:
+          description: ObjectId of recipient
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        content:
+          type: string
+          description: Content of the message
+        edited:
+          type: boolean
+          description: Whether the message is edited or not
+          default: false
+        status:
+          type: string
+          description: "Status of message (e.g \"sent\", \"read\", )"
+          default: not sent
+          enum:
+          - sent
+          - read
+          - not sent
+          - unread
+        timestamp:
+          type: string
+          description: The time it was sent defaults to date.now()
+          format: date-time
+      description: Message Schema... (assuming only text messages)
+      example:
+        id: 507c7f79bcf86cd7994f6c0e
+        senderId: 607c7f79bcf86cd7994f6c0e
+        recipientId: 907c7f79bcf86cd7994f6c0e
+        content: Hey bro.... where you at?
+    PrivateChat:
+      required:
+      - id
+      - messages
+      - user
+      type: object
+      properties:
+        id:
+          description: Unique Identifier for the chat room
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        user:
+          $ref: '#/components/schemas/PrivateChat_user'
+        messages:
+          minItems: 1
+          type: array
+          description: array of messages between the 2 users
+          items:
+            allOf:
+            - $ref: '#/components/schemas/Message'
+      description: every chat room a user have with other people
+    Journal:
+      required:
+      - dateCreated
+      - id
+      type: object
+      properties:
+        id:
+          description: unique id of the journal
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        title:
+          type: string
+          description: Optional title for the entry
+        content:
+          type: string
+          description: Text content for the entry
+        dateCreated:
+          type: string
+          description: timestamp of the journal created/updated in yyyy-MM-ddThr:mm:ssZ.
+          format: date-time
+        favorite:
+          type: boolean
+          description: whether the journal is fav or not
+          default: false
+      description: a schema for journal
+      example:
+      - id: alskdflsjoqiuroeuqerqe
+        title: my plans for today
+        content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do\
+          \ eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        dateCreated: 2024-02-17T16:28:00Z
+        favorite: false
+    Post:
+      required:
+      - content
+      - id
+      type: object
+      properties:
+        id:
+          description: Unique id the post
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        content:
+          type: string
+          description: Text content of the post
+        author:
+          $ref: '#/components/schemas/Post_author'
+        createdAt:
+          type: string
+          description: timestamp of the post created in yyyy-MM-ddThr:mm:ssZ.
+          format: date-time
+        comments:
+          type: array
+          description: Array of comments on the post
+          items:
+            allOf:
+            - $ref: '#/components/schemas/Comment'
+        likes:
+          type: array
+          description: Array of user IDs who liked the post
+          items:
+            allOf:
+            - $ref: '#/components/schemas/Id'
+      description: The post schema
+    Comment:
+      type: object
+      properties:
+        id:
+          description: Unique Id of the comment
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        user:
+          $ref: '#/components/schemas/Comment_user'
+        createdAt:
+          type: string
+          description: timestamp of the last time online in yyyy-MM-ddThr:mm:ssZ.
+          format: date-time
+    Id:
+      type: string
+      format: ObjectId
+      readOnly: true
+      example: 507c7f79bcf86cd7994f6c0e
+    Assessments:
+      required:
+      - assessmentType
+      - attemptsAllowed
+      - id
+      - status
+      - submission_type
+      - title
+      type: object
+      properties:
+        id:
+          description: Unique identifier for the assessment.
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        assessmentType:
+          type: string
+          description: "The type of assessment (e.g., \"quiz\", \"assignment\", \"\
+            homework\")."
+          enum:
+          - quiz
+          - assignment
+          - homework
+          - other
+        title:
+          type: string
+          description: The title of the assessment.
+        description:
+          type: string
+          description: A detailed description of the assessment's purpose and instructions
+            (optional).
+          nullable: true
+        due_date:
+          type: string
+          description: The due date and time for submitting the assessment only for
+            assignment.
+          format: date
+          nullable: true
+        submission_type:
+          type: string
+          description: "The method for submitting the assessment (e.g., \"upload\"\
+            , \"text answer\")."
+          enum:
+          - upload
+          - text_answer
+          - other
+        rubric:
+          type: string
+          description: A link to or description of the assessment rubric (optional).
+          format: uri
+          nullable: true
+        questions:
+          allOf:
+          - $ref: '#/components/schemas/Questions'
+        timeLimit:
+          type: integer
+          description: "Time limit to finish the assessment, if applicable (optional)"
+          nullable: true
+        attemptsAllowed:
+          type: integer
+          description: the numbers of times the user is allowed to try
+          default: 3
+        minimumWordCount:
+          type: integer
+          description: "The minimum numbers of words a user have to type, if applicable\
+            \ (optional)"
+          nullable: true
+          default: 20
+        status:
+          type: string
+          description: "The status of the assessment (e.g \"passed\", \"incomplete\"\
+            )"
+          readOnly: true
+          default: not started
+          enum:
+          - passed
+          - completed
+          - incomplete
+          - failed
+          - not started
+      description: Represents different types of assessments within the course.
+      example:
+        id: 507c7f79bcf86cd7994f6c0e
+        assessmentType: assignment
+        title: Assignment 1
+        description: "this assignment is all about you focusing on your discipline,\
+          \ please try to...."
+        attemptsAllowed: 5
+        due_date: 2024-07-02
+        submission_type: text answer
+        rubric: www.somewhere_elseformore.com
+        questions:
+        - id: 507c7f79bcf86cd7994f6c0e
+          questionType: choice
+          options:
+          - choice A
+          - choice B
+          - choice C
+          - choice D
+          answer:
+          - choice A
+          status: correct
+        timeLimit: 30
+        status: completed
+    Questions:
+      required:
+      - answer
+      - content
+      - id
+      - questionType
+      - status
+      type: array
+      description: Questions that are available in the  assessment
+      items:
+        $ref: '#/components/schemas/Questions_inner'
+    NotificationPreferences:
+      type: object
+      properties:
+        email:
+          $ref: '#/components/schemas/NotificationPreferences_email'
+        push:
+          $ref: '#/components/schemas/NotificationPreferences_push'
+        frequency:
+          type: string
+          description: "Overall notification frequency preference (e.g., \"daily\"\
+            , \"weekly\")."
+          default: weekly
+          enum:
+          - daily
+          - weekly
+          - occasional
+      description: Represents the user's preferences for receiving notifications.
+      example:
+        email:
+          enabled: true
+          types:
+          - news
+          - match_updates
+        push:
+          enabled: true
+          types:
+          - friend_activity
+        frequency: daily
+    Videos:
+      type: array
+      description: An array of video content for the course.
+      items:
+        $ref: '#/components/schemas/Videos_inner'
+    Modules:
+      required:
+      - description
+      - lessons
+      - title
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the module.
+        description:
+          type: string
+          description: A brief description of the module content and objectives (optional).
+        lessons:
+          type: array
+          description: An array of lesson objects representing module lessons.
+          items:
+            $ref: '#/components/schemas/Modules_lessons'
+      example:
+      - title: Module Title
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed\
+          \ do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim\
+          \ ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip\
+          \ ex ea commodo consequat."
+        lessons:
+        - title: Lesson Title
+        - description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed\
+            \ do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim\
+            \ ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip\
+            \ ex ea commodo consequat."
+        - title: Lesson 2 Title
+        - description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed\
+            \ do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim\
+            \ ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip\
+            \ ex ea commodo consequat."
+    User_emailAddress:
+      required:
+      - email
+      type: object
+      properties:
+        email:
+          type: string
+          description: User's Email address
+          format: email
+        verified:
+          type: boolean
+          description: Wheather the email is verified or not
+          readOnly: true
+          default: false
+      example: "{\"email\":\"example@example.com\",\"verified\":false}"
+    User_phoneNumber:
+      required:
+      - number
+      type: object
+      properties:
+        countryCode:
+          pattern: "^[A-Z]{2}$"
+          type: string
+          description: a two letter country code
+        number:
+          maxLength: 15
+          minLength: 7
+          type: string
+          description: |
+            Phone number in E.164 format minimum 7 and maximum 15
+            Including area code
+      example: "{\"countryCode\":\"US\",\"number\":12312322334}"
+    User_address:
+      required:
+      - city
+      - country
+      - postal_code
+      - state_province
+      - street_address
+      type: object
+      properties:
+        street_address:
+          type: string
+          description: "The street address line (e.g., house number, street name)."
+        street_address2:
+          type: string
+          description: "Additional address line for apartment/unit number, floor,\
+            \ etc. (optional)."
+        city:
+          type: string
+          description: The city name.
+        state_province:
+          type: string
+          description: The state or province name (or equivalent administrative region).
+        postal_code:
+          type: string
+          description: The postal code or ZIP code.
+        country:
+          type: string
+          description: The two-letter ISO 3166-1 alpha-2 country code.
+        additional_info:
+          type: string
+          description: "Additional address information (e.g., building name, floor,\
+            \ directions) (optional)."
+      example: "{\"street_address\":\"123 Main Street\",\"city\":\"Anytown\",\"state_province\"\
+        :\"CA\",\"postal_code\":90210,\"country\":\"US\",\"additional_info\":\"Building\
+        \ B, Apt 201\"}"
+    User_ranking:
+      required:
+      - date
+      - organization
+      - rank
+      type: object
+      properties:
+        rank:
+          type: integer
+          description: "The numerical ranking based on the ranking system (e.g., ATP\
+            \ or WTA)."
+        organization:
+          type: string
+          description: "The organization issuing the ranking (e.g., ATP, WTA)."
+        date:
+          type: string
+          description: The date the ranking was effective in yyyy-MM-dd format.
+          format: date
+        points:
+          type: integer
+          description: The total ranking points (optional).
+      description: Details about the tennis ranking (Optional).
+      example: "{\"rank\":5,\"organization\":\"ATP\",\"date\":\"2024-02-16\",\"points\"\
+        :3200}"
+    User_ustaRanking_singles:
+      required:
+      - category
+      - date
+      - ranking
+      type: object
+      properties:
+        ranking:
+          type: number
+          description: Numerical singles ranking within the USTA system.
+          format: double
+        category:
+          type: string
+          description: "Singles ranking category (e.g., NTRP, National)."
+        date:
+          type: string
+          description: Date the ranking was effective in yyyy-MM-dd format.
+          format: date
+      description: USTA singles ranking details (optional).
+    User_ustaRanking_doubles:
+      required:
+      - category
+      - date
+      - ranking
+      type: object
+      properties:
+        ranking:
+          type: number
+          description: Numerical doubles ranking within the USTA system.
+          format: float
+        category:
+          type: string
+          description: "Doubles ranking category (e.g., NTRP, National)."
+        date:
+          type: string
+          description: Date the ranking was effective in yyyy-MM-dd format.
+          format: date
+      description: USTA doubles ranking details (optional).
+    User_ustaRanking:
+      type: object
+      properties:
+        singles:
+          $ref: '#/components/schemas/User_ustaRanking_singles'
+        doubles:
+          $ref: '#/components/schemas/User_ustaRanking_doubles'
+      example: "{\"singles\":{\"ranking\":4.5,\"category\":\"NTRP\",\"date\":\"2024-02-16\"\
+        },\"doubles\":{\"ranking\":3.5,\"category\":\"NTRP\",\"date\":\"2024-02-16\"\
+        }}"
+    User_chatList:
+      required:
+      - chats
+      - unreadCount
+      type: object
+      properties:
+        chats:
+          type: array
+          items:
+            type: object
+            allOf:
+            - $ref: '#/components/schemas/PrivateChat'
+        unreadCount:
+          type: integer
+          description: total number of unread messages in the chat room
+      description: list of chats the user is texting
+    User_journals:
+      required:
+      - a
+      type: object
+      properties:
+        totalJournals:
+          type: integer
+          description: Total number of journal entries in the list
+        journals:
+          type: array
+          description: Array of journal entries
+          items:
+            $ref: '#/components/schemas/Journal'
+      description: list of the journals from the user
+    PrivateChat_user:
+      required:
+      - fullName
+      - isOnline
+      - lastMessage
+      - lastOnline
+      - profilePicture
+      - timestamp
+      - unreadCount
+      type: object
+      properties:
+        fullName:
+          type: string
+          description: full name of the other user
+        profilePicture:
+          type: string
+          description: profile picture of the other user
+          format: url
+        lastMessage:
+          type: string
+          description: Text of the last message between both users
+        timestamp:
+          type: string
+          description: timestamp of the last message in yyyy-MM-ddThr:mm:ssZ.
+          format: date-time
+        isOnline:
+          type: boolean
+          description: whether the user is online
+        lastOnline:
+          type: string
+          description: timestamp of the last time online in yyyy-MM-ddThr:mm:ssZ.
+          format: date-time
+        unreadCount:
+          type: integer
+          description: Number of unread messages for teh current user
+      description: an object that has the other user's information
+      example: "[{\"fullName\":\"Jhon Doe\",\"profilePicture\":\"www.something.com/something\"\
+        ,\"lastMessage\":\"Where You at bro?\",\"timestamp\":\"2024-02-17T16:28:00Z\"\
+        ,\"unreadCount\":1,\"isOnline\":false,\"lastOnline\":\"2024-02-17T16:28:00Z\"\
+        }]"
+    Post_author:
+      required:
+      - fullName
+      - id
+      - profilePicture
+      type: object
+      properties:
+        id:
+          description: Unique of the user posting
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        fullName:
+          type: string
+          description: Name of the user in full
+        profilePicture:
+          type: string
+          description: Users Profile Picture
+          format: url
+      example: "[{\"id\":\"507c7f79bcf86cd7994f6c0e\",\"fullName\":\"saminas hagos\"\
+        ,\"profilePicture\":\"www.somewhere.com/image/asdjf\"}]"
+    Comment_user:
+      type: object
+      properties:
+        id:
+          description: Unique Id of the user
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        fullName:
+          type: string
+          description: Name of the user commenting
+        profilePicture:
+          type: string
+          description: Picture of the user
+          format: url
+      description: the user commenting
+      example: "[{\"id\":\"507c7f79bcf86cd7994f6c0e\",\"fullName\":\"Saminas hagos\"\
+        ,\"profilePicture\":\"www.somewhere.com/image/adf\"}]"
+    Questions_inner:
+      type: object
+      properties:
+        id:
+          description: Unique identifier for the question.
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        questionType:
+          type: string
+          description: "question type (e.g, \"choice\", \"true/false\")"
+          enum:
+          - choice
+          - fill
+          - true/false
+        content:
+          type: string
+          description: the content of the question
+        options:
+          type: array
+          description: "list of choices for the question, if applicable (optional)"
+          nullable: true
+          items:
+            type: string
+        answer:
+          minLength: 1
+          type: array
+          description: a single or multiple answers
+          items:
+            type: string
+        status:
+          type: string
+          description: "Status of the question (e.g \"not started\", \"started\",\
+            \ \"correct\", \"incorrect\")"
+          default: not started
+          enum:
+          - not started
+          - started
+          - correct
+          - incorrect
+    NotificationPreferences_email:
+      required:
+      - enabled
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether email notifications are enabled.
+          default: true
+        types:
+          type: array
+          description: An array of notification types the user wants to receive via
+            email.
+          items:
+            type: string
+            enum:
+            - news
+            - match_updates
+            - friend_activity
+          default:
+          - friend_activity
+          - match_updates
+      description: Preferences for email notifications.
+    NotificationPreferences_push:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether push notifications are enabled.
+          default: true
+        types:
+          type: array
+          description: An array of notification types the user wants to receive via
+            push notifications.
+          items:
+            type: string
+            enum:
+            - news
+            - match_updates
+            - friend_activity
+          default:
+          - friend_activity
+      description: Preferences for push notifications.
+    Videos_inner:
+      required:
+      - description
+      - duration
+      - id
+      - thumbnail
+      - title
+      - url
+      type: object
+      properties:
+        id:
+          description: Unique identifier for the video.
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        title:
+          type: string
+          description: The title of the video.
+        description:
+          type: string
+          description: A brief description of the video content.
+        duration:
+          type: integer
+          description: The duration of the video in seconds.
+        url:
+          type: string
+          description: The UrL of the video hosted externally
+          format: uri
+        thumbnail:
+          type: string
+          description: The URL of the video thumbnail
+          format: uri
+        caption:
+          type: string
+          description: The URL of the video captions (optional)
+          format: uri
+          nullable: true
+      example:
+      - id: 507c7f79bcf86cd7994f6c0e
+        title: lesson 1
+        description: in this lesson we will learn...
+        duration: 87000
+        url: www.somewhere.com/videos/videoId
+        thumbnail: www.somewhere.com/videos/videoId/thumbnail
+        caption: www.somewhre.com/videos/videoId/captoin
+    Modules_lessons:
+      required:
+      - description
+      - title
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the lesson.
+        description:
+          type: string
+          description: A brief description of the module content and objectives
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    GoogleOpenIdConnect:
+      type: openIdConnect
+      openIdConnectUrl: https://accounts.google.com/.well-known/openid-configuration
