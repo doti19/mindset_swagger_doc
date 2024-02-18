@@ -1,0 +1,1 @@
+# mindset_swagger_doc
