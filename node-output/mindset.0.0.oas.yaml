@@ -1,11 +1,11 @@
 openapi: 3.0.0
 info:
-  title: Mindset
+  title: Mindset Performance Institute
   description: |
     A Platform focusing in youths reaching their true potential..........
   termsOfService: http://mindset.io/terms/
   contact:
-    email: apiteam@mindset.io
+    email: support@mpr.io
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
