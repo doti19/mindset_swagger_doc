@@ -1,13 +1,38 @@
 openapi: 3.0.0
 info:
   title: Mindset
-  description: A Platform focusing in youths reaching their true potential
+  description: |
+    A Platform focusing in youths reaching their true potential..........
+  termsOfService: http://mindset.io/terms/
+  contact:
+    email: apiteam@mindset.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.0
 servers:
 - url: https://virtserver.swaggerhub.com/SAMINASSAMINAS/mindset/1.0.0
   description: SwaggerHub API Auto Mocking
 - url: http://localhost:3000/api/v1
   description: Local Server
+tags:
+- name: User
+  description: "User related operations, like view, update and delete oneself."
+- name: Authentication
+  description: "User Authentication and Authorization, uses Bearer and \nGoogle Oauth2.0\
+    \ includes functionalities like loggin in \n"
+- name: Chat
+  description: User chatting functionalities
+- name: Course
+  description: All Course related functionalities
+- name: Journal
+  description: All Journal related functionalities
+- name: Post
+  description: All Post related functionalities
+- name: Comment
+  description: All Comment related functionalities
+- name: Like
+  description: All Like related functionalities
 paths:
   /auth/register:
     post:
