@@ -1,0 +1,2998 @@
+openapi: 3.0.0
+info:
+  title: Mindset Performance Institute
+  description: |
+    A Platform focusing in youths reaching their true potential..........
+  termsOfService: http://mindset.io/terms/
+  contact:
+    email: support@mpr.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/SAMINASSAMINAS/mindset/1.0.0
+  description: SwaggerHub API Auto Mocking
+- url: http://localhost:3000/api/v1
+  description: Local Server
+tags:
+- name: User
+  description: "User related operations, like view, update and delete oneself."
+- name: Authentication
+  description: "User Authentication and Authorization, uses Bearer and \nGoogle Oauth2.0\
+    \ includes functionalities like loggin in \n"
+- name: Chat
+  description: User chatting functionalities
+- name: Course
+  description: All Course related functionalities
+- name: Journal
+  description: All Journal related functionalities
+- name: Post
+  description: All Post related functionalities
+- name: Comment
+  description: All Comment related functionalities
+- name: Like
+  description: All Like related functionalities
+paths:
+  /auth/register:
+    post:
+      tags:
+      - Authentication
+      summary: Register a new user
+      description: Registers a new user with the provided details.
+      requestBody:
+        $ref: '#/components/requestBodies/User'
+      responses:
+        "200":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: "Bad request, invalid input"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/login:
+    post:
+      tags:
+      - Authentication
+      summary: Log in a user
+      description: Logs in a user with the provided credentials.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/auth_login_body'
+        required: true
+      responses:
+        "200":
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "401":
+          description: "Unauthorized, invalid credentials"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /auth/google:
+    get:
+      tags:
+      - Authentication
+      summary: Google OpenID Connect endpoint
+      description: "Logs in a user via Google. If the user is logging in for the first\
+        \ time, a new user is registered."
+      responses:
+        "200":
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "401":
+          description: "Unauthorized, invalid credentials"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /auth/forgot-password:
+    post:
+      tags:
+      - Authentication
+      summary: Forgot password
+      description: Sends a password reset email to the provided email address.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/auth_forgotpassword_body'
+        required: true
+      responses:
+        "200":
+          description: Password reset email sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: "Bad request, invalid email"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/reset-password:
+    post:
+      tags:
+      - Authentication
+      summary: Reset password
+      description: Resets the user's password using the provided reset token and new
+        password.
+      parameters:
+      - name: token
+        in: query
+        description: reset token
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/auth_resetpassword_body'
+        required: true
+      responses:
+        "200":
+          description: Password reset successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: "Bad request, invalid token or password"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+  /auth/logout:
+    post:
+      tags:
+      - Authentication
+      summary: Log out a user
+      description: Logs out the user by invalidating their authentication token.
+      responses:
+        "200":
+          description: User logged out successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "401":
+          description: "Unauthorized, invalid token"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /user/{userId}:
+    get:
+      tags:
+      - User
+      summary: Get user profile
+      description: Retrieves the profile of the currently authenticated user.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "401":
+          description: "Unauthorized, invalid token"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+    put:
+      tags:
+      - User
+      summary: Update user profile
+      description: Updates the profile of the currently authenticated user with the
+        provided details.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: "Bad request, invalid input"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "401":
+          description: "Unauthorized, invalid token"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+    delete:
+      tags:
+      - User
+      summary: Delete the authenticated user's profile
+      description: Deletes the authenticated user's profile and all associated data.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "204":
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "401":
+          description: "Unauthorized, invalid token"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /users/{userId}/chats:
+    get:
+      tags:
+      - Chat
+      summary: Get all chats for a user
+      description: Returns a list of chat IDs that the user is a participant in.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: Number of items per page for pagination
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+      - name: sort
+        in: query
+        description: Sorting order
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: filter
+        in: query
+        description: Filtering criteria
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: search
+        in: query
+        description: Search query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: fields
+        in: query
+        description: Fields to include in the response
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Operation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /chats/{chatId}:
+    get:
+      tags:
+      - Chat
+      summary: Get a specific chat
+      description: "Returns the details of a chat, including the messages in the chat."
+      parameters:
+      - name: chatId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: Operation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: Chat not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+    delete:
+      tags:
+      - Chat
+      summary: Delete a chat
+      description: Deletes a chat and all its messages.
+      parameters:
+      - name: chatId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "204":
+          description: Chat deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: Chat not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /chats/{chatId}/messages:
+    post:
+      tags:
+      - Chat
+      summary: Create a new message in a chat
+      description: The message content and sender ID are sent in the request body.
+      parameters:
+      - name: chatId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/Message'
+      responses:
+        "201":
+          description: Message created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Chat not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /chats/{chatId}/messages/{messageId}:
+    put:
+      tags:
+      - Chat
+      summary: Update a message in a chat
+      description: The new message content is sent in the request body.
+      parameters:
+      - name: chatId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: messageId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/Message'
+      responses:
+        "200":
+          description: Message updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Message not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+    delete:
+      tags:
+      - Chat
+      summary: Delete a message in a chat
+      description: Deletes a message from a chat.
+      parameters:
+      - name: chatId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: messageId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "204":
+          description: Message deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: Message not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /users/{userId}/courses:
+    get:
+      tags:
+      - Course
+      summary: Get all courses for a user
+      description: Returns a list of course IDs that the user is enrolled in.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: Number of items per page for pagination
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+      - name: sort
+        in: query
+        description: Sorting order
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: filter
+        in: query
+        description: Filtering criteria
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: search
+        in: query
+        description: Search query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: fields
+        in: query
+        description: Fields to include in the response
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Operation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /courses/{courseId}:
+    get:
+      tags:
+      - Course
+      summary: Get a specific course
+      description: Returns the details of a course.
+      parameters:
+      - name: courseId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: Operation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+    put:
+      tags:
+      - Course
+      summary: Update a course status
+      description: The new course status is sent in the request body.
+      parameters:
+      - name: courseId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/CourseStatus'
+      responses:
+        "200":
+          description: Course status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /courses/{courseId}/assessments/{assessmentId}:
+    put:
+      tags:
+      - Course
+      summary: Update an assessment status
+      description: The new assessment status is sent in the request body.
+      parameters:
+      - name: courseId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: assessmentId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/AssessmentStatus'
+      responses:
+        "200":
+          description: Assessment status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Assessment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /courses/{courseId}/assessments/{assessmentId}/questions/{questionId}:
+    put:
+      tags:
+      - Course
+      summary: Update a question status
+      description: The new question status is sent in the request body.
+      parameters:
+      - name: courseId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: assessmentId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: questionId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/QuestionStatus'
+      responses:
+        "200":
+          description: Question status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Question not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /users/{userId}/journals:
+    get:
+      tags:
+      - Journal
+      summary: Get all journals for a user
+      description: Returns a list of journal IDs that the user has created.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: Number of items per page for pagination
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+      - name: sort
+        in: query
+        description: Sorting order
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: filter
+        in: query
+        description: Filtering criteria
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: search
+        in: query
+        description: Search query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Operation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+    post:
+      tags:
+      - Journal
+      summary: Create a new journal for a user
+      description: The journal details are sent in the request body.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/Journal'
+      responses:
+        "201":
+          description: Journal created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /users/{userId}/journals/{journalId}:
+    get:
+      tags:
+      - Journal
+      summary: Get a specific journal
+      description: Returns the details of a journal.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: journalId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: Operation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: Journal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+    put:
+      tags:
+      - Journal
+      summary: Update a journal
+      description: The new journal details are sent in the request body.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: journalId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/Journal'
+      responses:
+        "200":
+          description: Journal updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Journal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+    delete:
+      tags:
+      - Journal
+      summary: Delete a journal
+      description: Deletes a journal.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: journalId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "204":
+          description: Journal deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: Journal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /users/{userId}/posts:
+    get:
+      tags:
+      - Post
+      summary: Get all posts for a user
+      description: Returns a list of post IDs that the user has created.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: Number of items per page for pagination
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+      - name: sort
+        in: query
+        description: Sorting order
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: filter
+        in: query
+        description: Filtering criteria
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: search
+        in: query
+        description: Search query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Operation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+    post:
+      tags:
+      - Post
+      summary: Create a new post for a user
+      description: The post details are sent in the request body.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/Post'
+      responses:
+        "201":
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /users/{userId}/posts/{postId}:
+    get:
+      tags:
+      - Post
+      summary: Get a specific post
+      description: Returns the details of a post.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: postId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: Operation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+    put:
+      tags:
+      - Post
+      summary: Update a post
+      description: The new post details are sent in the request body.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: postId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/Post'
+      responses:
+        "200":
+          description: Post updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+    delete:
+      tags:
+      - Post
+      summary: Delete a post
+      description: Deletes a post.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: postId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "204":
+          description: Post deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /users/{userId}/posts/{postId}/comments:
+    get:
+      tags:
+      - Comment
+      summary: Get all comments for a post
+      description: Returns a list of comment IDs for a post.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: postId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: Number of items per page for pagination
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+      - name: sort
+        in: query
+        description: Sorting order
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: filter
+        in: query
+        description: Filtering criteria
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: search
+        in: query
+        description: Search query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Operation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+    post:
+      tags:
+      - Comment
+      summary: Create a new comment for a post
+      description: The comment details are sent in the request body.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: postId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/Comment'
+      responses:
+        "201":
+          description: Comment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /users/{userId}/posts/{postId}/comments/{commentId}:
+    get:
+      tags:
+      - Comment
+      summary: Get a specific comment
+      description: Returns the details of a comment.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: postId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: commentId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: Operation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: Comment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+    put:
+      tags:
+      - Comment
+      summary: Update a comment
+      description: The new comment details are sent in the request body.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: postId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: commentId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/Comment'
+      responses:
+        "200":
+          description: Comment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Comment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+    delete:
+      tags:
+      - Comment
+      summary: Delete a comment
+      description: Deletes a comment.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: postId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: commentId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "204":
+          description: Comment deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "404":
+          description: Comment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+  /users/{userId}/posts/{postId}/likes:
+    post:
+      tags:
+      - Like
+      summary: Like a post
+      description: Adds a like to a post.
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      - name: postId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "201":
+          description: Like added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - JWT: []
+      - GoogleOpenIdConnect: []
+components:
+  schemas:
+    User:
+      required:
+      - address
+      - courses
+      - dateOfBirth
+      - email
+      - firstName
+      - gender
+      - id
+      - isOnline
+      - isProfilePublic
+      - lastName
+      - lastOnline
+      - notificationPreference
+      - phoneNumber
+      type: object
+      properties:
+        id:
+          description: Unique identifier for the User.
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        firstName:
+          type: string
+          description: User's last name
+        lastName:
+          type: string
+          description: User's last name
+        emailAddress:
+          $ref: '#/components/schemas/User_emailAddress'
+        dateOfBirth:
+          type: string
+          description: User's date of birth in yyyy-MM-dd format
+          format: date
+          example: 1997-07-06
+        gender:
+          type: string
+          description: User's specified gender
+          example: male
+          enum:
+          - male
+          - female
+          - other
+        phoneNumber:
+          $ref: '#/components/schemas/User_phoneNumber'
+        address:
+          $ref: '#/components/schemas/User_address'
+        ranking:
+          $ref: '#/components/schemas/User_ranking'
+        ustaRanking:
+          $ref: '#/components/schemas/User_ustaRanking'
+        isProfilePublic:
+          type: boolean
+          description: "Whether the User's profile is public or not, defaults to true"
+          readOnly: true
+          example: true
+          default: true
+        notificationPreference:
+          $ref: '#/components/schemas/NotificationPreferences'
+        courses:
+          type: array
+          description: List of courses the user is going to take
+          items:
+            $ref: '#/components/schemas/User_courses'
+        isOnline:
+          type: boolean
+          description: Status of user used in the chat page
+          default: false
+        lastOnline:
+          type: string
+          description: timestamp of the last time online in yyyy-MM-ddThr:mm:ssZ.
+          format: date-time
+        chatList:
+          $ref: '#/components/schemas/User_chatList'
+        journals:
+          type: array
+          description: Array of journal Id
+          items:
+            $ref: '#/components/parameters/journalId'
+        posts:
+          type: array
+          description: Array of Posts stored as Id
+          items:
+            $ref: '#/components/parameters/postId'
+      description: The basic User Schema
+    Course:
+      required:
+      - assessments
+      - courseDuration
+      - curriculum
+      - description
+      - id
+      - level
+      - resources
+      - startingDate
+      - status
+      - title
+      - videos
+      type: object
+      properties:
+        id:
+          description: A unique generated course Id
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        title:
+          type: string
+          description: The title of the course.
+          example: The Power of Discipline
+        description:
+          type: string
+          description: A detailed description of the course content and objectives.
+          example: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do\
+            \ eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim\
+            \ ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip\
+            \ ex ea commodo consequat."
+        level:
+          type: string
+          description: "The difficulty level of the course (e.g., beginner, intermediate,\
+            \ advanced)."
+          example: beginner
+        courseDuration:
+          type: integer
+          description: "The estimated duration of the course in weeks or hours, which\
+            \ one?."
+          format: int32
+          example: 2
+        startingDate:
+          type: string
+          description: When the user started this course in yyyy-MM-dd format.
+          format: Date
+          example: 2024-02-14
+        resources:
+          type: array
+          description: links to document URL
+          example:
+          - www.something.com/something
+          - www.somethingElse.com/somethingElse
+          items:
+            type: string
+            format: uri
+        curriculums:
+          type: array
+          description: Defines the structured overview of modules and lessons in the
+            course.
+          items:
+            allOf:
+            - $ref: '#/components/schemas/Curriculum'
+        isActive:
+          type: boolean
+          description: Indicates course availability
+          readOnly: true
+          example: true
+          default: false
+        assessments:
+          minLength: 1
+          type: array
+          description: List of assessments
+          items:
+            allOf:
+            - $ref: '#/components/schemas/Assessment'
+        videos:
+          allOf:
+          - $ref: '#/components/schemas/Video'
+        status:
+          type: string
+          description: "current status of course (e.g \"started\", \"finished\", \"\
+            new\")"
+          example: started
+          default: new
+          enum:
+          - started
+          - finished
+          - new
+      description: Course Schema
+    Message:
+      required:
+      - content
+      - senderId
+      type: object
+      properties:
+        id:
+          description: The unique identifier of the message
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        senderId:
+          description: The ObjectId of sender
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        content:
+          type: string
+          description: Content of the message
+        edited:
+          type: boolean
+          description: Whether the message is edited or not
+          default: false
+        status:
+          type: string
+          description: "Status of message (e.g \"sent\", \"read\", )"
+          default: not sent
+          enum:
+          - sent
+          - read
+          - not sent
+          - unread
+        timestamp:
+          type: string
+          description: The time it was sent defaults to date.now()
+          format: date-time
+      description: Message Schema... (assuming only text messages)
+      example:
+        id: 507c7f79bcf86cd7994f6c0e
+        senderId: 607c7f79bcf86cd7994f6c0e
+        content: Hey bro.... where you at?
+    Chat:
+      required:
+      - id
+      - messages
+      - user
+      type: object
+      properties:
+        id:
+          description: Unique Identifier for the chat room
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        participants:
+          type: array
+          items:
+            description: Unique Id of all the users participating in the chat
+            allOf:
+            - $ref: '#/components/schemas/Id'
+        messages:
+          minItems: 1
+          type: array
+          description: array of messages between the 2 users
+          items:
+            allOf:
+            - $ref: '#/components/schemas/Message'
+      description: every chat room a user have with other people
+    Journal:
+      required:
+      - dateCreated
+      - id
+      type: object
+      properties:
+        id:
+          description: unique id of the journal
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        title:
+          type: string
+          description: Optional title for the entry
+        content:
+          type: string
+          description: Text content for the entry
+        dateCreated:
+          type: string
+          description: timestamp of the journal created/updated in yyyy-MM-ddThr:mm:ssZ.
+          format: date-time
+        isFavorite:
+          type: boolean
+          description: whether the journal is fav or not
+          default: false
+      description: a schema for journal
+      example:
+      - id: alskdflsjoqiuroeuqerqe
+        title: my plans for today
+        content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do\
+          \ eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        dateCreated: 2024-02-17T16:28:00Z
+        favorite: false
+    Post:
+      required:
+      - content
+      - id
+      type: object
+      properties:
+        id:
+          description: Unique id the post
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        content:
+          type: string
+          description: Text content of the post
+        author:
+          $ref: '#/components/schemas/Post_author'
+        createdAt:
+          type: string
+          description: timestamp of the post created in yyyy-MM-ddThr:mm:ssZ.
+          format: date-time
+        comments:
+          type: array
+          description: Array of comments on the post
+          items:
+            allOf:
+            - $ref: '#/components/schemas/Comment'
+        likes:
+          type: array
+          description: Array of user IDs who liked the post
+          items:
+            allOf:
+            - $ref: '#/components/schemas/Id'
+      description: The post schema
+    Comment:
+      required:
+      - comment
+      type: object
+      properties:
+        id:
+          description: Unique Id of the comment
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        user:
+          $ref: '#/components/schemas/Comment_user'
+        comment:
+          type: string
+          description: the comment of user
+        createdAt:
+          type: string
+          description: timestamp of the last time online in yyyy-MM-ddThr:mm:ssZ.
+          format: date-time
+    Link:
+      type: object
+      properties:
+        rel:
+          type: string
+          description: The relationship of the linked resource to the current resource.
+        href:
+          type: string
+          description: The URL of the linked resource
+          format: uri
+        method:
+          type: string
+          description: The HTTP method to use for the linked resource.
+          enum:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+    Id:
+      type: string
+      format: ObjectId
+      readOnly: true
+      example: 507c7f79bcf86cd7994f6c0e
+    Assessment:
+      required:
+      - assessmentType
+      - attemptsAllowed
+      - id
+      - status
+      - submission_type
+      - title
+      type: object
+      properties:
+        id:
+          description: Unique identifier for the assessment.
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        assessmentType:
+          type: string
+          description: "The type of assessment (e.g., \"quiz\", \"assignment\", \"\
+            homework\")."
+          enum:
+          - quiz
+          - assignment
+          - homework
+          - other
+        title:
+          type: string
+          description: The title of the assessment.
+        description:
+          type: string
+          description: A detailed description of the assessment's purpose and instructions
+            (optional).
+          nullable: true
+        dueDate:
+          type: string
+          description: The due date and time for submitting the assessment only for
+            assignment.
+          format: date
+          nullable: true
+        submissionType:
+          type: string
+          description: "The method for submitting the assessment (e.g., \"upload\"\
+            , \"text answer\")."
+          enum:
+          - upload
+          - text_answer
+          - other
+        questions:
+          allOf:
+          - $ref: '#/components/schemas/Question'
+        timeLimit:
+          type: integer
+          description: "Time limit to finish the assessment, if applicable (optional)"
+          format: int32
+          nullable: true
+        attemptsAllowed:
+          type: integer
+          description: the numbers of times the user is allowed to try
+          format: int32
+          default: 3
+        minimumWordCount:
+          type: integer
+          description: "The minimum numbers of words a user have to type, if applicable\
+            \ (optional)"
+          format: int32
+          nullable: true
+          default: 20
+        status:
+          type: string
+          description: "The status of the assessment (e.g \"passed\", \"incomplete\"\
+            )"
+          readOnly: true
+          default: not started
+          enum:
+          - passed
+          - completed
+          - incomplete
+          - failed
+          - not started
+      description: Represents different types of assessments within the course.
+      example:
+        id: 507c7f79bcf86cd7994f6c0e
+        assessmentType: assignment
+        title: Assignment 1
+        description: "this assignment is all about you focusing on your discipline,\
+          \ please try to...."
+        attemptsAllowed: 5
+        due_date: 2024-07-02
+        submission_type: text answer
+        rubric: www.somewhere_elseformore.com
+        questions:
+        - id: 507c7f79bcf86cd7994f6c0e
+          questionType: choice
+          options:
+          - choice A
+          - choice B
+          - choice C
+          - choice D
+          answer:
+          - choice A
+          status: correct
+        timeLimit: 30
+        status: completed
+    Question:
+      required:
+      - answer
+      - content
+      - id
+      - questionType
+      - status
+      type: array
+      description: Questions that are available in the  assessment
+      items:
+        $ref: '#/components/schemas/Question_inner'
+    NotificationPreferences:
+      type: object
+      properties:
+        email:
+          $ref: '#/components/schemas/NotificationPreferences_email'
+        push:
+          $ref: '#/components/schemas/NotificationPreferences_push'
+        frequency:
+          type: string
+          description: "Overall notification frequency preference (e.g., \"daily\"\
+            , \"weekly\")."
+          default: weekly
+          enum:
+          - daily
+          - weekly
+          - occasional
+      description: Represents the user's preferences for receiving notifications.
+      example:
+        email:
+          enabled: true
+          types:
+          - news
+          - match_updates
+        push:
+          enabled: true
+          types:
+          - friend_activity
+        frequency: daily
+    Video:
+      type: array
+      description: An array of video content for the course.
+      items:
+        $ref: '#/components/schemas/Video_inner'
+    Curriculum:
+      type: object
+      properties:
+        modules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Module'
+    Module:
+      required:
+      - description
+      - lessons
+      - title
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the module.
+        description:
+          type: string
+          description: A brief description of the module content and objectives (optional).
+        lessons:
+          type: array
+          description: An array of lesson objects representing module lessons.
+          items:
+            $ref: '#/components/schemas/Module_lessons'
+      example:
+      - title: Module Title
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed\
+          \ do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim\
+          \ ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip\
+          \ ex ea commodo consequat."
+        lessons:
+        - title: Lesson Title
+        - description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed\
+            \ do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim\
+            \ ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip\
+            \ ex ea commodo consequat."
+        - title: Lesson 2 Title
+        - description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed\
+            \ do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim\
+            \ ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip\
+            \ ex ea commodo consequat."
+    ChatResource:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Chat'
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+    MessageResource:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Message'
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - success
+        statusCode:
+          maximum: 399
+          minimum: 200
+          type: integer
+          description: The HTTP status code of the successful operation
+          format: int32
+        data:
+          type: object
+          description: The data returned by the successful operation
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - error
+        statusCode:
+          maximum: 599
+          minimum: 400
+          type: integer
+          description: The HTTP status code of the error
+          format: int32
+        message:
+          type: string
+          description: A human-readable error messages
+    auth_login_body:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    auth_forgotpassword_body:
+      required:
+      - email
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+    auth_resetpassword_body:
+      required:
+      - password
+      type: object
+      properties:
+        newPassword:
+          type: string
+    User_emailAddress:
+      required:
+      - email
+      type: object
+      properties:
+        email:
+          type: string
+          description: User's Email address
+          format: email
+        verified:
+          type: boolean
+          description: Wheather the email is verified or not
+          readOnly: true
+          default: false
+      example: "{\"email\":\"example@example.com\",\"verified\":false}"
+    User_phoneNumber:
+      required:
+      - number
+      type: object
+      properties:
+        countryCode:
+          pattern: "^[A-Z]{2}$"
+          type: string
+          description: a two letter country code
+        number:
+          maxLength: 15
+          minLength: 7
+          type: string
+          description: |
+            Phone number in E.164 format minimum 7 and maximum 15
+            Including area code
+      example: "{\"countryCode\":\"US\",\"number\":12312322334}"
+    User_address:
+      required:
+      - city
+      - country
+      - postal_code
+      - state_province
+      - street_address
+      type: object
+      properties:
+        street_address:
+          type: string
+          description: "The street address line (e.g., house number, street name)."
+        street_address2:
+          type: string
+          description: "Additional address line for apartment/unit number, floor,\
+            \ etc. (optional)."
+        city:
+          type: string
+          description: The city name.
+        state_province:
+          type: string
+          description: The state or province name (or equivalent administrative region).
+        postal_code:
+          type: string
+          description: The postal code or ZIP code.
+        country:
+          type: string
+          description: The two-letter ISO 3166-1 alpha-2 country code.
+        additional_info:
+          type: string
+          description: "Additional address information (e.g., building name, floor,\
+            \ directions) (optional)."
+      example: "{\"street_address\":\"123 Main Street\",\"city\":\"Anytown\",\"state_province\"\
+        :\"CA\",\"postal_code\":90210,\"country\":\"US\",\"additional_info\":\"Building\
+        \ B, Apt 201\"}"
+    User_ranking:
+      required:
+      - date
+      - organization
+      - rank
+      type: object
+      properties:
+        rank:
+          type: integer
+          description: "The numerical ranking based on the ranking system (e.g., ATP\
+            \ or WTA)."
+        organization:
+          type: string
+          description: "The organization issuing the ranking (e.g., ATP, WTA)."
+        date:
+          type: string
+          description: The date the ranking was effective in yyyy-MM-dd format.
+          format: date
+        points:
+          type: integer
+          description: The total ranking points (optional).
+      description: Details about the tennis ranking (Optional).
+      example: "{\"rank\":5,\"organization\":\"ATP\",\"date\":\"2024-02-16\",\"points\"\
+        :3200}"
+    User_ustaRanking_singles:
+      required:
+      - category
+      - date
+      - ranking
+      type: object
+      properties:
+        ranking:
+          type: number
+          description: Numerical singles ranking within the USTA system.
+          format: double
+        category:
+          type: string
+          description: "Singles ranking category (e.g., NTRP, National)."
+        date:
+          type: string
+          description: Date the ranking was effective in yyyy-MM-dd format.
+          format: date
+      description: USTA singles ranking details (optional).
+    User_ustaRanking_doubles:
+      required:
+      - category
+      - date
+      - ranking
+      type: object
+      properties:
+        ranking:
+          type: number
+          description: Numerical doubles ranking within the USTA system.
+          format: float
+        category:
+          type: string
+          description: "Doubles ranking category (e.g., NTRP, National)."
+        date:
+          type: string
+          description: Date the ranking was effective in yyyy-MM-dd format.
+          format: date
+      description: USTA doubles ranking details (optional).
+    User_ustaRanking:
+      type: object
+      properties:
+        singles:
+          $ref: '#/components/schemas/User_ustaRanking_singles'
+        doubles:
+          $ref: '#/components/schemas/User_ustaRanking_doubles'
+      example: "{\"singles\":{\"ranking\":4.5,\"category\":\"NTRP\",\"date\":\"2024-02-16\"\
+        },\"doubles\":{\"ranking\":3.5,\"category\":\"NTRP\",\"date\":\"2024-02-16\"\
+        }}"
+    User_courses:
+      type: object
+      properties:
+        courseId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+          - started
+          - finished
+          - locked
+          - new
+    User_chatList:
+      required:
+      - chats
+      - unreadCount
+      type: object
+      properties:
+        chats:
+          type: array
+          items:
+            type: object
+            allOf:
+            - $ref: '#/components/schemas/Chat'
+        unreadCount:
+          type: integer
+          description: total number of unread messages in the chat room
+      description: list of chats the user is texting
+    Post_author:
+      required:
+      - fullName
+      - id
+      - profilePicture
+      type: object
+      properties:
+        id:
+          description: Unique of the user posting
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        fullName:
+          type: string
+          description: Name of the user in full
+        profilePicture:
+          type: string
+          description: Users Profile Picture
+          format: url
+      example: "[{\"id\":\"507c7f79bcf86cd7994f6c0e\",\"fullName\":\"saminas hagos\"\
+        ,\"profilePicture\":\"www.somewhere.com/image/asdjf\"}]"
+    Comment_user:
+      type: object
+      properties:
+        id:
+          description: Unique Id of the user
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        fullName:
+          type: string
+          description: Name of the user commenting
+        profilePicture:
+          type: string
+          description: Picture of the user
+          format: url
+      description: the user commenting
+      example: "[{\"id\":\"507c7f79bcf86cd7994f6c0e\",\"fullName\":\"Saminas hagos\"\
+        ,\"profilePicture\":\"www.somewhere.com/image/adf\"}]"
+    Question_inner:
+      type: object
+      properties:
+        id:
+          description: Unique identifier for the question.
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        questionType:
+          type: string
+          description: "question type (e.g, \"choice\", \"true/false\")"
+          enum:
+          - choice
+          - fill
+          - true/false
+        content:
+          type: string
+          description: the content of the question
+        choices:
+          type: array
+          description: "list of choices for the question, if applicable (optional)"
+          nullable: true
+          items:
+            type: string
+        answer:
+          minLength: 1
+          type: array
+          description: a single or multiple answers
+          items:
+            type: string
+        status:
+          type: string
+          description: "Status of the question (e.g \"not started\", \"started\",\
+            \ \"correct\", \"incorrect\")"
+          default: not started
+          enum:
+          - not started
+          - started
+          - correct
+          - incorrect
+    NotificationPreferences_email:
+      required:
+      - enabled
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether email notifications are enabled.
+          default: true
+        types:
+          type: array
+          description: An array of notification types the user wants to receive via
+            email.
+          items:
+            type: string
+            enum:
+            - news
+            - match_updates
+            - friend_activity
+          default:
+          - friend_activity
+          - match_updates
+      description: Preferences for email notifications.
+    NotificationPreferences_push:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether push notifications are enabled.
+          default: true
+        types:
+          type: array
+          description: An array of notification types the user wants to receive via
+            push notifications.
+          items:
+            type: string
+            enum:
+            - news
+            - match_updates
+            - friend_activity
+          default:
+          - friend_activity
+      description: Preferences for push notifications.
+    Video_inner:
+      required:
+      - description
+      - duration
+      - id
+      - thumbnail
+      - title
+      - url
+      type: object
+      properties:
+        id:
+          description: Unique identifier for the video.
+          allOf:
+          - $ref: '#/components/schemas/Id'
+        title:
+          type: string
+          description: The title of the video.
+        description:
+          type: string
+          description: A brief description of the video content.
+        duration:
+          type: integer
+          description: The duration of the video in seconds.
+        url:
+          type: string
+          description: The UrL of the video hosted externally
+          format: uri
+        thumbnail:
+          type: string
+          description: The URL of the video thumbnail
+          format: uri
+        caption:
+          type: string
+          description: The URL of the video captions (optional)
+          format: uri
+          nullable: true
+      example:
+      - id: 507c7f79bcf86cd7994f6c0e
+        title: lesson 1
+        description: in this lesson we will learn...
+        duration: 87000
+        url: www.somewhere.com/videos/videoId
+        thumbnail: www.somewhere.com/videos/videoId/thumbnail
+        caption: www.somewhre.com/videos/videoId/captoin
+    Module_lessons:
+      required:
+      - description
+      - title
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the lesson.
+        description:
+          type: string
+          description: A brief description of the module content and objectives
+  parameters:
+    userId:
+      name: userId
+      in: path
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+    chatId:
+      name: chatId
+      in: path
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+    messageId:
+      name: messageId
+      in: path
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+    courseId:
+      name: courseId
+      in: path
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+    questionId:
+      name: questionId
+      in: path
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+    assessmentId:
+      name: assessmentId
+      in: path
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+    journalId:
+      name: journalId
+      in: path
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+    postId:
+      name: postId
+      in: path
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+    commentId:
+      name: commentId
+      in: path
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+    page:
+      name: page
+      in: query
+      description: Page number for pagination
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: integer
+        format: int32
+    limit:
+      name: limit
+      in: query
+      description: Number of items per page for pagination
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: integer
+        format: int32
+    sort:
+      name: sort
+      in: query
+      description: Sorting order
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+    filter:
+      name: filter
+      in: query
+      description: Filtering criteria
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+    search:
+      name: search
+      in: query
+      description: Search query
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+    fields:
+      name: fields
+      in: query
+      description: Fields to include in the response
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+  requestBodies:
+    User:
+      description: A User to be created or updated
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+      required: true
+    Message:
+      description: A message to be created or updated
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Message'
+      required: true
+    Chat:
+      description: A chat to be created or updated
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Chat'
+      required: true
+    AssessmentStatus:
+      description: The new status of the assessment
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: The status of the assessment
+                enum:
+                - pending
+                - completed
+                - in_progress
+      required: true
+    QuestionStatus:
+      description: The new status of the question
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: The status of the question
+                enum:
+                - unanswered
+                - answered
+                - flagged
+      required: true
+    CourseStatus:
+      description: The new status of the course
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: The status of the course
+                enum:
+                - not_started
+                - in_progress
+                - completed
+      required: true
+    Journal:
+      description: The details of the journal
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+                description: The title of the journal
+              content:
+                type: string
+                description: The content of the journal
+              dateCreated:
+                type: string
+                description: The date the journal was created
+                format: date-time
+              isFavourite:
+                type: boolean
+                description: Whether the journal is marked as favourite
+      required: true
+    Post:
+      description: The details of the post
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
+                type: string
+                description: The content of the post
+              createdAt:
+                type: string
+                description: The date the post was created
+                format: date-time
+      required: true
+    Comment:
+      description: The details of the comment
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userId:
+                type: string
+                description: The ID of the user who made the comment
+              comment:
+                type: string
+                description: The content of the comment
+      required: true
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    GoogleOpenIdConnect:
+      type: openIdConnect
+      openIdConnectUrl: https://accounts.google.com/.well-known/openid-configuration
